@@ -1,6 +1,8 @@
 {
   "name": "nextjs-example-app",
   "version": "0.1.0",
+  "author": {"name": "b310 digital gmbh"},
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -H 0.0.0.0",
