@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/home/node/app
+    ports:
+      - "3000:3000"
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: ${POSTGRES_DB:-app-dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app-password}
+      POSTGRES_USER: ${POSTGRES_USER:-app-user}
+    # Exposing the port is not needed unless you want to access this database instance from the host.
+    # Be careful when other postgres docker container are running on the same port
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+
+volumes:
+  postgres_data:

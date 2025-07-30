@@ -1,0 +1,17 @@
+# Ignore everything by default
+*
+
+# Allow explicitly
+!src/
+!config/
+!public/
+!packages/
+!.eslint.config.mjs
+!index.html
+!LICENSE
+!package-lock.json
+!package.json
+!postcss.config.mjs
+!tsconfig.json
+!next-env.d.ts
+!next.config.ts
