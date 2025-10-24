@@ -5,6 +5,9 @@ export interface Platform {
   platform: AllowedPlatform;
   platform_name: string;
   standardized_name: string;
+  // Format Mapping fields (joined from format_mappings table)
+  content_box?: string;
+  marke?: string;
 }
 
 export interface PlatformFormData {
