@@ -6,12 +6,15 @@ import { Box, Button } from '@mui/material';
 import { Platform } from '@/types/platform';
 import { supabase } from '@/lib/supabase';
 import PlatformDialog from './PlatformDialog';
+import ConfirmationDialog from './ConfirmationDialog';
 
 export default function PlatformTable() {
   const [rows, setRows] = useState<GridRowsProp<Platform>>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [platformToDelete, setPlatformToDelete] = useState<string | null>(null);
 
   const columns: GridColDef<Platform>[] = [
     { field: 'platform', headerName: 'Platform', width: 200, editable: false },
@@ -36,7 +39,7 @@ export default function PlatformTable() {
             variant="outlined"
             color="error"
             size="small"
-            onClick={() => handleDelete(params.row.platform_id)}
+            onClick={() => handleDeleteClick(params.row.platform_id)}
           >
             Delete
           </Button>
@@ -74,17 +77,31 @@ export default function PlatformTable() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (platformId: string) => {
-    const { error } = await supabase
-      .from('platforms')
-      .delete()
-      .eq('platform_id', platformId);
+  const handleDeleteClick = (platformId: string) => {
+    setPlatformToDelete(platformId);
+    setConfirmDeleteOpen(true);
+  };
 
-    if (error) {
-      console.error('Error deleting platform:', error);
-    } else {
-      await fetchPlatforms();
+  const handleConfirmDelete = async () => {
+    if (platformToDelete) {
+      const { error } = await supabase
+        .from('platforms')
+        .delete()
+        .eq('platform_id', platformToDelete);
+
+      if (error) {
+        console.error('Error deleting platform:', error);
+      } else {
+        await fetchPlatforms();
+      }
     }
+    setConfirmDeleteOpen(false);
+    setPlatformToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteOpen(false);
+    setPlatformToDelete(null);
   };
 
   const handleDialogClose = async (refresh: boolean) => {
@@ -116,6 +133,13 @@ export default function PlatformTable() {
         open={dialogOpen}
         platform={selectedPlatform}
         onClose={handleDialogClose}
+      />
+      <ConfirmationDialog
+        open={confirmDeleteOpen}
+        title="Delete Platform"
+        message="Are you sure you want to delete this entry?"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </Box>
   );
