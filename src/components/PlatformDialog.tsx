@@ -150,6 +150,25 @@ export default function PlatformDialog({
             required
             fullWidth
           />
+
+          {platform && (
+            <>
+              <TextField
+                label="Content Box"
+                value={platform.content_box || 'N/A'}
+                disabled
+                fullWidth
+                helperText="From Format Mapping"
+              />
+              <TextField
+                label="Marke"
+                value={platform.marke || 'N/A'}
+                disabled
+                fullWidth
+                helperText="From Format Mapping"
+              />
+            </>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
