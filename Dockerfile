@@ -1,30 +1,35 @@
-FROM node:24-alpine3.21 AS base
+FROM node:24.8-alpine3.21 AS base
 
 # Our development docker image:
 FROM base AS development
 WORKDIR /home/node/app
-RUN corepack enable pnpm
 
 # Based on https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 # 1. Stage: Build deps
 FROM base AS deps
 
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # 2. Stage: Build app
 FROM base AS builder
 ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
-RUN corepack enable pnpm
 
 # Build application
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm run build
+RUN npx prisma generate
+RUN npm run build
 
-# 3. Stage: Runner
+# 3. Stage: Migration
+FROM deps AS migration-runner
+COPY prisma prisma
+RUN npx prisma generate
+CMD ["sh", "-c", "npx prisma migrate deploy"]
+
+# 4. Stage: Runner
 FROM base AS runner
 ENV NEXT_TELEMETRY_DISABLED=1
 
