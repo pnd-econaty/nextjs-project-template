@@ -116,6 +116,7 @@ export default function PlatformTable() {
         open={dialogOpen}
         platform={selectedPlatform}
         onClose={handleDialogClose}
+        existingPlatforms={rows}
       />
     </Box>
   );
