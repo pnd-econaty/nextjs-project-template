@@ -12,24 +12,24 @@ import {
 } from '@mui/material';
 import { Platform, PlatformFormData } from '@/types/platform';
 import { supabase } from '@/lib/supabase';
+import { validatePlatformForm, ValidationErrors } from '@/utils/platformValidation';
 
 interface PlatformDialogProps {
   open: boolean;
   platform: Platform | null;
   onClose: (refresh: boolean) => void;
+  existingPlatforms: Platform[];
 }
 
-interface ValidationErrors {
-  platform?: string;
-  platform_name?: string;
-  platform_id?: string;
-  standardized_name?: string;
-}
-
-export default function PlatformDialog({ open, platform, onClose }: PlatformDialogProps) {
+export default function PlatformDialog({
+  open,
+  platform,
+  onClose,
+  existingPlatforms
+}: PlatformDialogProps) {
   const [formData, setFormData] = useState<PlatformFormData>({
     platform_id: '',
-    platform: '',
+    platform: 'YouTube',
     platform_name: '',
     standardized_name: '',
   });
@@ -42,7 +42,7 @@ export default function PlatformDialog({ open, platform, onClose }: PlatformDial
     } else {
       setFormData({
         platform_id: '',
-        platform: '',
+        platform: 'YouTube',
         platform_name: '',
         standardized_name: '',
       });
@@ -51,26 +51,14 @@ export default function PlatformDialog({ open, platform, onClose }: PlatformDial
   }, [platform, open]);
 
   const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {};
+    const validationResult = validatePlatformForm(
+      formData,
+      existingPlatforms,
+      !!platform // isEditMode
+    );
 
-    if (!formData.platform.trim()) {
-      newErrors.platform = 'Platform is required';
-    }
-
-    if (!formData.platform_name.trim()) {
-      newErrors.platform_name = 'Platform Name is required';
-    }
-
-    if (!formData.platform_id.trim()) {
-      newErrors.platform_id = 'Platform ID is required';
-    }
-
-    if (!formData.standardized_name.trim()) {
-      newErrors.standardized_name = 'Standardized Name is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(validationResult.errors);
+    return validationResult.isValid;
   };
 
   const handleSubmit = async () => {
@@ -128,7 +116,7 @@ export default function PlatformDialog({ open, platform, onClose }: PlatformDial
           <TextField
             label="Platform"
             value={formData.platform}
-            onChange={(e) => handleChange('platform', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('platform', e.target.value)}
             error={!!errors.platform}
             helperText={errors.platform}
             required
@@ -137,7 +125,7 @@ export default function PlatformDialog({ open, platform, onClose }: PlatformDial
           <TextField
             label="Platform Name"
             value={formData.platform_name}
-            onChange={(e) => handleChange('platform_name', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('platform_name', e.target.value)}
             error={!!errors.platform_name}
             helperText={errors.platform_name}
             required
@@ -146,7 +134,7 @@ export default function PlatformDialog({ open, platform, onClose }: PlatformDial
           <TextField
             label="Platform ID"
             value={formData.platform_id}
-            onChange={(e) => handleChange('platform_id', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('platform_id', e.target.value)}
             error={!!errors.platform_id}
             helperText={errors.platform_id}
             required
@@ -156,7 +144,7 @@ export default function PlatformDialog({ open, platform, onClose }: PlatformDial
           <TextField
             label="Standardized Name"
             value={formData.standardized_name}
-            onChange={(e) => handleChange('standardized_name', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('standardized_name', e.target.value)}
             error={!!errors.standardized_name}
             helperText={errors.standardized_name}
             required
