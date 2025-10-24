@@ -20,14 +20,10 @@ WORKDIR /app
 # Build application
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npx prisma generate
 RUN npm run build
 
 # 3. Stage: Migration
 FROM deps AS migration-runner
-COPY prisma prisma
-RUN npx prisma generate
-CMD ["sh", "-c", "npx prisma migrate deploy"]
 
 # 4. Stage: Runner
 FROM base AS runner
